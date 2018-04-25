@@ -25,8 +25,8 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
     private MainViewModel mainViewModel;
     private MainRecyclerViewAdapter adapter;
     private RecyclerView recyclerView;
-    boolean backPressed;
 
+    boolean loadedImagesFromUser;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,11 +45,13 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
         mainViewModel.getPhotos().observe(this, new Observer<List<Photo>>() {
             @Override
             public void onChanged(@Nullable List<Photo> photos) {
-                if (photos.size() == 0){
-                    mainViewModel.getPopularPhotos();
-                    Toast.makeText(getApplicationContext(), "Sorry, we couldn't find any more photos \n from that user", Toast.LENGTH_LONG).show();
+                if(photos != null) {
+                    if (photos.size() == 0) {
+                        mainViewModel.getPopularPhotos();
+                        Toast.makeText(getApplicationContext(), "Sorry, we couldn't find any more photos \n from that user", Toast.LENGTH_LONG).show();
+                    }
+                    adapter.setPhotoList(photos);
                 }
-                adapter.setPhotoList(photos);
             }
         });
     }
@@ -88,7 +90,7 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
         switch (requestCode) {
             case 8907:
                 if(resultCode == RESULT_MORE_PHOTOS_FROM_USER) {
-                    backPressed = false;
+                    loadedImagesFromUser = true;
                     getMoreFromUser(data.getStringExtra("user"));
                 }
         }
@@ -96,11 +98,10 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
     }
 
     @Override
-    public void onBackPressed()
-    {
-        if (backPressed != true){
+    public void onBackPressed() {
+        if (loadedImagesFromUser){
             mainViewModel.getPopularPhotos();
-            backPressed = true;
+            loadedImagesFromUser = false;
         }else {
             super.onBackPressed();
         }
