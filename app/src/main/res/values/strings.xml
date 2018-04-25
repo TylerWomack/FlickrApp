@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">FlickrApp</string>
+    <string name="flickr_api_key">523c09e21fe0a874f8c185ff67f853d4</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

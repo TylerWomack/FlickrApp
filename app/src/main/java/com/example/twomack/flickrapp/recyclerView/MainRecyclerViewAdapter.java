@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
-import com.example.twomack.flickrapp.Photo;
+import com.example.twomack.flickrapp.data.Photo;
 import com.example.twomack.flickrapp.R;
 
 import java.util.List;
@@ -19,31 +19,38 @@ public class MainRecyclerViewAdapter  extends RecyclerView.Adapter<MainViewHolde
     private OnPhotoSelectedListener listener;
 
     public interface OnPhotoSelectedListener {
-        void onPhotoClicked(int position);
+        void onPhotoClicked(int position, Photo photo);
     }
 
     public MainRecyclerViewAdapter(OnPhotoSelectedListener listener) {
         this.listener = listener;
     }
 
-    //@Override
+    @Override
     public MainViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.main_list_item, parent, false);
         return new MainViewHolder(view);
     }
 
-    //@Override
-    public void onBindViewHolder(final MainViewHolder holder, int position) {
+    @Override
+    public void onBindViewHolder(final MainViewHolder holder, final int position) {
 
         Glide.with(holder.getItemView().getContext())
-                .load(R.drawable.place_holder_image)
+                .load(photoList.get(position).getUrl())
+                .apply(new RequestOptions().placeholder(R.drawable.place_holder_image))
                 .into(holder.getImageView());
 
 
-        holder.getItemView().setOnClickListener(new View.OnClickListener() {
+        /*
+        Glide.with(holder.getItemView().getContext())
+                .load(R.drawable.place_holder_image)
+                .into(holder.getImageView());
+                */
+
+        holder.getItemView().setOnClickListener( new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                listener.onPhotoClicked(holder.getAdapterPosition());
+                listener.onPhotoClicked(holder.getAdapterPosition(), photoList.get(position));
             }
         });
     }
