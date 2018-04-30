@@ -7,6 +7,7 @@ import com.example.twomack.flickrapp.BuildConfig;
 import com.example.twomack.flickrapp.data.FlickrResponse;
 import com.example.twomack.flickrapp.data.Photo;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -29,6 +30,7 @@ public class Networker {
 
     public LiveData<List<Photo>> getPhotoObservable(){return responses;}
 
+
     public String getYesterdaysDate(){
         Date date = new Date();
         Calendar cal = Calendar.getInstance();
@@ -43,6 +45,7 @@ public class Networker {
 
         Retrofit retrofit = buildRetrofit();
         API api = retrofit.create(API.class);
+
         //you're getting 5 pages of 100 responses, but you're only using 99 of them.
         Call<FlickrResponse> flickrObservable = api.getInterestingPhotosByDate(
                 "flickr.interestingness.getList", getYesterdaysDate(), "523c09e21fe0a874f8c185ff67f853d4",
@@ -55,7 +58,7 @@ public class Networker {
                 if (response.body() == null || response.body().getPhotos() == null) {
                     return;
                 }
-                    response.body().getPhotos().setPage(2);
+
                     responses.setValue(response.body().getPhotos().getPhoto());
 
             }
@@ -69,11 +72,30 @@ public class Networker {
 
     }
 
+    public List<Photo> getPhotosSynchronously(int page, int loadCount){
+        Retrofit retrofit = buildRetrofit();
+        API api = retrofit.create(API.class);
+
+        String count = String.valueOf(loadCount);
+
+        //you're getting 5 pages of 100 responses, but you're only using 99 of them.
+        Call<FlickrResponse> flickrObservable = api.getInterestingPhotosByDateAndPage(
+                "flickr.interestingness.getList", getYesterdaysDate(), "523c09e21fe0a874f8c185ff67f853d4",
+                "json", "1", String.valueOf(loadCount), String.valueOf(page));
+
+        try {
+            //responses.postValue(flickrObservable.execute().body().getPhotos().getPhoto());
+            return flickrObservable.execute().body().getPhotos().getPhoto();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public void findPhotosFromUser(String userId){
 
         Retrofit retrofit = buildRetrofit();
         API api = retrofit.create(API.class);
-        //you're getting 5 pages of 100 responses, but you're only using 99 of them.
         api.getPhotosFromUser(
                 "flickr.people.getPhotosOf", userId, "523c09e21fe0a874f8c185ff67f853d4",
                 "json", "1").enqueue(new Callback<FlickrResponse>() {

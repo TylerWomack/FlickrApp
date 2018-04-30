@@ -2,6 +2,7 @@ package com.example.twomack.flickrapp;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.arch.paging.PagedList;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -11,6 +12,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.widget.Toast;
 
+import com.example.twomack.flickrapp.data.FlickrResponse;
 import com.example.twomack.flickrapp.data.Photo;
 import com.example.twomack.flickrapp.networking.Networker;
 import com.example.twomack.flickrapp.recyclerView.MainRecyclerViewAdapter;
@@ -36,11 +38,17 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
         recyclerView = findViewById(R.id.recyclerView);
 
         configureRecyclerView();
-        configureObservables();
-
-        mainViewModel.getPopularPhotos();
+        mainViewModel.updatePhotoPages();
+        mainViewModel.getPhotoPages().observe(this, new Observer<PagedList<Photo>>() {
+            @Override
+            public void onChanged(@Nullable PagedList<Photo> photos) {
+                adapter.setPhotoList(photos);
+                int x = 5;
+            }
+        });
     }
 
+    /*
     public void configureObservables(){
         mainViewModel.getPhotos().observe(this, new Observer<List<Photo>>() {
             @Override
@@ -55,15 +63,20 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
             }
         });
     }
+    */
 
     private void configureRecyclerView() {
-        adapter = new MainRecyclerViewAdapter(this);
+        adapter = new MainRecyclerViewAdapter();
         recyclerView.setLayoutManager(new GridLayoutManager(this,
                 4,
                 LinearLayoutManager.VERTICAL, false));
         recyclerView.setAdapter(adapter);
 
     }
+
+
+
+
 
     @Override
     public void onPhotoClicked(int position, Photo photo) {
