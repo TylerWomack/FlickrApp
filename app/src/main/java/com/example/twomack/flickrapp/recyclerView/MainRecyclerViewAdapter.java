@@ -3,47 +3,31 @@ package com.example.twomack.flickrapp.recyclerView;
 import android.arch.paging.PagedListAdapter;
 import android.support.annotation.NonNull;
 import android.support.v7.util.DiffUtil;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.twomack.flickrapp.data.Photo;
 import com.example.twomack.flickrapp.R;
 
-import java.util.List;
 
 
-public class MainRecyclerViewAdapter  extends PagedListAdapter<Photo, MainViewHolder>{
 
-    //extends RecyclerView.Adapter<MainViewHolder>
+public class MainRecyclerViewAdapter extends PagedListAdapter<Photo, MainViewHolder>{
 
-    private List<Photo> photoList;
     private OnPhotoSelectedListener listener;
 
-
-    public MainRecyclerViewAdapter() {
+    public MainRecyclerViewAdapter(OnPhotoSelectedListener listener) {
         super(DIFF_CALLBACK);
+        this.listener = listener;
     }
-
-    /*
-    protected MainRecyclerViewAdapter(@NonNull DiffUtil.ItemCallback<Photo> diffCallback) {
-        super(diffCallback);
-    }
-    */
 
     public interface OnPhotoSelectedListener {
         void onPhotoClicked(int position, Photo photo);
     }
-
-    /*
-    public MainRecyclerViewAdapter(OnPhotoSelectedListener listener) {
-        this.listener = listener;
-    }
-    */
-
 
     @Override
     public MainViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -53,40 +37,30 @@ public class MainRecyclerViewAdapter  extends PagedListAdapter<Photo, MainViewHo
 
     @Override
     public void onBindViewHolder(final MainViewHolder holder, final int position) {
+        final Photo photo = getItem(position);
 
-        Glide.with(holder.getItemView().getContext())
-                .load(photoList.get(position).getUrl())
-                .apply(new RequestOptions().placeholder(R.drawable.place_holder_image))
-                .into(holder.getImageView());
+        if (photo != null) {
+            Glide.with(holder.getItemView().getContext())
+                    .load(photo.getUrl())
+                    .apply(new RequestOptions().placeholder(R.drawable.place_holder_image))
+                    .into(holder.getImageView());
+        }
 
         holder.getItemView().setOnClickListener( new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                listener.onPhotoClicked(holder.getAdapterPosition(), photoList.get(position));
+                listener.onPhotoClicked(holder.getAdapterPosition(), photo);
             }
         });
     }
 
-    public void setPhotoList(List<Photo> photoList) {
-        this.photoList = photoList;
-        notifyDataSetChanged();
-    }
-
-
-    @Override
-    public int getItemCount() {
-        if(photoList != null) {
-            return photoList.size();
-        }
-        return 0;
-    }
-
-    public static final DiffUtil.ItemCallback<Photo> DIFF_CALLBACK =
+    //todo: gain a better understanding of this.
+    private static final DiffUtil.ItemCallback<Photo> DIFF_CALLBACK =
             new DiffUtil.ItemCallback<Photo>() {
                 @Override
                 public boolean areItemsTheSame(@NonNull Photo oldPhoto, @NonNull Photo newPhoto) {
                     // User properties may have changed if reloaded from the DB, but ID is fixed
-                    return oldPhoto.getId() == newPhoto.getId();
+                    return oldPhoto.getId().equals(newPhoto.getId());
                 }
                 @Override
                 public boolean areContentsTheSame(@NonNull Photo oldPhoto, @NonNull Photo newPhoto) {

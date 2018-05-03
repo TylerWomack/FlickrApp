@@ -1,10 +1,9 @@
 package com.example.twomack.flickrapp;
 
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.ViewModel;
 
+import android.arch.lifecycle.ViewModel;
 import com.example.twomack.flickrapp.data.Photo;
-import com.example.twomack.flickrapp.networking.Networker;
+
 
 import java.util.List;
 

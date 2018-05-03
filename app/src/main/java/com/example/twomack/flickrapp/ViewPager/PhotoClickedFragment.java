@@ -33,7 +33,6 @@ public class PhotoClickedFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         Bundle bundle = getArguments();
-
         int position = 0;
 
         if(bundle != null) {
@@ -55,7 +54,6 @@ public class PhotoClickedFragment extends Fragment {
         }else {
             imageTitle.setVisibility(View.INVISIBLE);
         }
-
         return rootView;
     }
 

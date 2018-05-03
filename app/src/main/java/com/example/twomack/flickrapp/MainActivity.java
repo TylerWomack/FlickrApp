@@ -1,5 +1,6 @@
 package com.example.twomack.flickrapp;
 
+import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.arch.paging.PagedList;
@@ -39,55 +40,52 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
 
         configureRecyclerView();
         mainViewModel.updatePhotoPages();
+        configureObservables();
+    }
+
+    public void configureObservables(){
         mainViewModel.getPhotoPages().observe(this, new Observer<PagedList<Photo>>() {
             @Override
             public void onChanged(@Nullable PagedList<Photo> photos) {
-                adapter.setPhotoList(photos);
-                int x = 5;
-            }
-        });
-    }
-
-    /*
-    public void configureObservables(){
-        mainViewModel.getPhotos().observe(this, new Observer<List<Photo>>() {
-            @Override
-            public void onChanged(@Nullable List<Photo> photos) {
-                if(photos != null) {
-                    if (photos.size() == 0) {
-                        mainViewModel.getPopularPhotos();
-                        Toast.makeText(getApplicationContext(), "Sorry, we couldn't find any more photos \n from that user", Toast.LENGTH_LONG).show();
-                    }
-                    adapter.setPhotoList(photos);
+                if (photos != null) {
+                    adapter.submitList(photos);
                 }
             }
         });
     }
-    */
 
     private void configureRecyclerView() {
-        adapter = new MainRecyclerViewAdapter();
-        recyclerView.setLayoutManager(new GridLayoutManager(this,
-                4,
+        adapter = new MainRecyclerViewAdapter(this);
+        recyclerView.setLayoutManager(new GridLayoutManager(this, 4,
                 LinearLayoutManager.VERTICAL, false));
         recyclerView.setAdapter(adapter);
-
     }
-
-
-
-
 
     @Override
     public void onPhotoClicked(int position, Photo photo) {
+
+        //an empty observer. This is necessary because the LivePagedListBuilder doesn't do any work (and create new pagedLists) until it is observed.
+        mainViewModel.getPhotoPages().observe(this, new Observer<PagedList<Photo>>() {
+            @Override
+            public void onChanged(@Nullable PagedList<Photo> photos) {}
+        });
+
+
         Intent intent = new Intent(this, PhotoClickedActivity.class);
         intent.putExtra("url", photo.getUrl());
         intent.putExtra("title", photo.getTitle());
         intent.putExtra("userId", photo.getOwner());
         intent.putExtra("position", position);
-        ArrayList<Photo> photos = new ArrayList<>(mainViewModel.getPhotos().getValue());
+        ArrayList<Photo> photos = new ArrayList<>();
+        if (mainViewModel.getPhotoPages().getValue() == null){
+            return;
+        }
+        int size = mainViewModel.getPhotoPages().getValue().size();
+        PagedList<Photo> page = mainViewModel.getPhotoPages().getValue();
+        for (int i = 0; i < size; i++){
+            photos.add(page.get(i));
+        }
         intent.putParcelableArrayListExtra("photos", photos);
-
         startActivityForResult(intent, 8907);
     }
 
@@ -105,6 +103,8 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
                 if(resultCode == RESULT_MORE_PHOTOS_FROM_USER) {
                     loadedImagesFromUser = true;
                     getMoreFromUser(data.getStringExtra("user"));
+                    //configureObservables needed to refresh UI
+                    configureObservables();
                 }
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -113,7 +113,10 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
     @Override
     public void onBackPressed() {
         if (loadedImagesFromUser){
-            mainViewModel.getPopularPhotos();
+            mainViewModel.getPhotoPages().removeObservers(this);
+            mainViewModel.updatePhotoPages();
+            //configureObservables needed to refresh UI
+            configureObservables();
             loadedImagesFromUser = false;
         }else {
             super.onBackPressed();

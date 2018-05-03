@@ -12,7 +12,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.ImageView;
 import android.widget.TextView;
 import com.example.twomack.flickrapp.ViewPager.PhotoClickedFragment;
 import com.example.twomack.flickrapp.data.Photo;
@@ -24,19 +23,7 @@ public class PhotoClickedActivity extends AppCompatActivity {
 
     TextView title;
     PhotoClickedViewModel viewModel;
-
-    private String userId;
-
-    /**
-     * The pager widget, which handles animation and allows swiping horizontally to access previous
-     * and next wizard steps.
-     */
     ViewPager viewPager;
-
-    /**
-     * The pager adapter, which provides the pages to the view pager widget.
-     */
-    private PagerAdapter mPagerAdapter;
 
 
     @Override
@@ -54,14 +41,13 @@ public class PhotoClickedActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu, menu);
-
         return super.onCreateOptionsMenu(menu);
     }
 
     public void getMorePhotosFromUser(MenuItem m){
         Intent intent = new Intent();
         int position = viewPager.getCurrentItem();
-        userId = viewModel.getPhotos().get(position).getOwner();
+        String userId = viewModel.getPhotos().get(position).getOwner();
         intent.putExtra("user", userId);
         setResult(RESULT_MORE_PHOTOS_FROM_USER, intent);
         finish();
@@ -70,14 +56,14 @@ public class PhotoClickedActivity extends AppCompatActivity {
     public void configureViewPager(){
         viewPager = findViewById(R.id.viewPager);
         int position = getIntent().getIntExtra("position", -1);
-        mPagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager(), viewModel.getPhotos().size());
+        PagerAdapter mPagerAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager(), viewModel.getPhotos().size());
         viewPager.setAdapter(mPagerAdapter);
         viewPager.setCurrentItem(position);
     }
 
     private class ScreenSlidePagerAdapter extends FragmentStatePagerAdapter {
         private int size;
-        public ScreenSlidePagerAdapter(FragmentManager fm, int size) {
+        ScreenSlidePagerAdapter(FragmentManager fm, int size) {
             super(fm);
             this.size = size;
         }
