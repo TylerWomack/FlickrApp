@@ -37,7 +37,7 @@ public class MainViewModel extends ViewModel {
         DataSource.Factory<Integer, Photo> factory = new DataSource.Factory<Integer, Photo>() {
             @Override
             public DataSource<Integer, Photo> create() {
-                networker.userId = null;
+                networker.setUserId(null);
                 return networker;
             }
         };
@@ -56,7 +56,7 @@ public class MainViewModel extends ViewModel {
         DataSource.Factory<Integer, Photo> factory = new DataSource.Factory<Integer, Photo>() {
             @Override
             public DataSource<Integer, Photo> create() {
-                networker.userId = userId;
+                networker.setUserId(userId);
                 return networker;
             }
         };

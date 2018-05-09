@@ -25,11 +25,15 @@ public class Networker extends PageKeyedDataSource<Integer, Photo> {
 
     private API api;
     private int pages;
-    public String userId;
+    private String userId;
 
     public Networker(){
         Retrofit retrofit = buildRetrofit();
         api = retrofit.create(API.class);
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     private Retrofit retrofitInstance;
